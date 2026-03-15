@@ -2,16 +2,13 @@
 #include <iostream>
 #include <stdexcept>
 
-// ── Constructor ────────────────────────────────────────────────────────
 Board::Board() {
-    // All unique_ptr cells are default-constructed to nullptr — board starts empty.
+    //board starts empty.
 }
 
-// ── Piece Placement ────────────────────────────────────────────────────
 void Board::setElement(int row, int col, std::unique_ptr<Piece> piece) {
     if (!inBounds(row, col))
         throw std::out_of_range("Board::setElement — position out of range");
-    // Let the piece know its location on the board
     if (piece) piece->setPosition(row, col);
     grid_[row][col] = std::move(piece);
 }
@@ -27,10 +24,9 @@ void Board::clear() {
             cell.reset();
 }
 
-// ── Queries ────────────────────────────────────────────────────────────
 Piece* Board::getElement(int row, int col) const {
     if (!inBounds(row, col)) return nullptr;
-    return grid_[row][col].get();          // non-owning raw pointer
+    return grid_[row][col].get();       
 }
 
 bool Board::inBounds(int row, int col) const {
@@ -51,7 +47,6 @@ bool Board::isEnemy(int row, int col, Color color) const {
     return grid_[row][col]->getColor() != color;
 }
 
-// ── Deep-copy Clone (used for move simulation) ─────────────────────────
 Board Board::clone() const {
     Board copy;
     for (int r = 0; r < SIZE; ++r)
@@ -61,7 +56,6 @@ Board Board::clone() const {
     return copy;
 }
 
-// ── ASCII Debug Print ──────────────────────────────────────────────────
 void Board::print() const {
     std::cout << "  a b c d e f g h\n";
     for (int r = SIZE - 1; r >= 0; --r) {

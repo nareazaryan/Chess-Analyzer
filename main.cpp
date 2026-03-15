@@ -1,30 +1,3 @@
-/*
- * ═══════════════════════════════════════════════════════════════
- *  Chess State Analyzer — Interactive Board Setup
- *  Compiled with: g++ -std=c++17 -Wall -Wextra -o chess_analyzer main.cpp Board.cpp Pieces.cpp GameAnalyzer.cpp
- * ═══════════════════════════════════════════════════════════════
- *
- *  Notation for placing pieces:
- *    <piece><file><rank>
- *
- *    Piece letter (case determines color):
- *      lowercase = White :  k q r b n p
- *      UPPERCASE = Black :  K Q R B N P
- *
- *    File : a–h   Rank : 1–8
- *
- *  Examples:
- *    ke1   → White King on e1
- *    Ka8   → Black King on a8
- *    qd1   → White Queen on d1
- *    Rd8   → Black Rook on d8
- *
- *  Commands:
- *    done  → print board and run analysis
- *    clear → reset the board
- *    quit  → exit
- */
-
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -34,9 +7,7 @@
 #include "Pieces.h"
 #include "GameAnalyzer.h"
 
-// ─────────────────────────────────────────────────────────────────────
-// Count how many pieces of a given type and color are on the board.
-// ─────────────────────────────────────────────────────────────────────
+
 static int countPieces(const Board& board, Color color, char pieceTypeLower) {
     int count = 0;
     for (int r = 0; r < Board::SIZE; ++r) {
@@ -52,10 +23,7 @@ static int countPieces(const Board& board, Color color, char pieceTypeLower) {
     return count;
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Parse a token like "ke1" or "Ka8" and place the piece on the board.
-// Returns false and prints an error if the token is invalid.
-// ─────────────────────────────────────────────────────────────────────
+
 static bool placePiece(Board& board, const std::string& token) {
     if (token.size() != 3) {
         std::cout << "  [!] Invalid token \"" << token
@@ -67,7 +35,6 @@ static bool placePiece(Board& board, const std::string& token) {
     char fileChar  = static_cast<char>(std::tolower(token[1]));
     char rankChar  = token[2];
 
-    // Validate file (a–h) and rank (1–8)
     if (fileChar < 'a' || fileChar > 'h') {
         std::cout << "  [!] Invalid file '" << token[1] << "' — must be a–h\n";
         return false;
@@ -77,23 +44,19 @@ static bool placePiece(Board& board, const std::string& token) {
         return false;
     }
 
-    // Color: lowercase letter → White, uppercase letter → Black
     Color color = std::islower(static_cast<unsigned char>(pieceChar))
                   ? Color::White
                   : Color::Black;
 
-    // Board coordinate: col = file - 'a', row = rank - '1'
     int col = fileChar - 'a';
     int row = rankChar - '1';
 
-    // Pawns are illegal on rank 1 (row 0) or rank 8 (row 7)
     char p = static_cast<char>(std::tolower(static_cast<unsigned char>(pieceChar)));
     if (p == 'p' && (row == 0 || row == 7)) {
         std::cout << "  [!] Pawns cannot be placed on rank 1 or rank 8.\n";
         return false;
     }
 
-    // Build the piece from the lowercase piece letter
     std::unique_ptr<Piece> piece;
     switch (p) {
         case 'k': piece = std::make_unique<King>  (color, row, col); break;
@@ -108,13 +71,7 @@ static bool placePiece(Board& board, const std::string& token) {
             return false;
     }
 
-    // ── Enforce chess piece-count limits ─────────────────────────────
-    // King  : exactly 1 per side
-    // Pawn  : max 8 per side
-    // Queen : max 9  (1 start + 8 pawn-promotions)
-    // Rook  : max 10 (2 start + 8 pawn-promotions)
-    // Bishop: max 10 (2 start + 8 pawn-promotions)
-    // Knight: max 10 (2 start + 8 pawn-promotions)
+
     {
         int maxAllowed = 0;
         const char* pieceName2 = "";
@@ -154,7 +111,6 @@ static bool placePiece(Board& board, const std::string& token) {
 
     board.setElement(row, col, std::move(piece));
 
-    // Friendly confirmation
     const char* colorName = (color == Color::White) ? "White" : "Black";
     std::string pieceName;
     switch (p) {
@@ -170,9 +126,7 @@ static bool placePiece(Board& board, const std::string& token) {
     return true;
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Ask user which color to analyze and run GameAnalyzer.
-// ─────────────────────────────────────────────────────────────────────
+
 static void runAnalysis(const Board& board) {
     board.print();
 
@@ -198,7 +152,6 @@ static void runAnalysis(const Board& board) {
     GameAnalyzer(board).evaluate(side);
 }
 
-// ─────────────────────────────────────────────────────────────────────
 int main() {
     std::cout << "╔══════════════════════════════════════════════════╗\n";
     std::cout << "║     Chess State Analyzer — Interactive Setup     ║\n";
@@ -218,7 +171,7 @@ int main() {
     while (true) {
         std::cout << "> ";
         std::string line;
-        if (!std::getline(std::cin, line)) break;   // EOF
+        if (!std::getline(std::cin, line)) break; 
 
         // Parse space-separated tokens on the same line
         std::istringstream ss(line);
@@ -226,7 +179,6 @@ int main() {
         bool gotCommand = false;
 
         while (ss >> token) {
-            // Normalize command tokens to lowercase for comparison
             std::string lower = token;
             std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
@@ -275,7 +227,7 @@ int main() {
                     }
                 }
                 runAnalysis(board);
-                board.clear();   // reset for next puzzle
+                board.clear();  
                 std::cout << "\n─────────────────────────────────────────────────────\n";
                 std::cout << "  Board reset. Enter pieces for a new position, or type quit.\n\n";
                 gotCommand = true;

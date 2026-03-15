@@ -1,10 +1,7 @@
 #include "Pieces.h"
 #include "Board.h"
 
-// ══════════════════════════════════════════════════════════════════════
-// King
-// Moves one square in any of the 8 directions.
-// ══════════════════════════════════════════════════════════════════════
+
 std::vector<Square> King::getPossibleMoves(const Board& board) const {
     std::vector<Square> moves;
     static const int deltas[8][2] = {
@@ -26,9 +23,7 @@ bool King::canAttack(int r, int c, const Board& /*board*/) const {
            !(r == row_ && c == col_);
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// Queen — combines Rook + Bishop sliding
-// ══════════════════════════════════════════════════════════════════════
+// Queen — Rook + Bishop sliding
 static const std::vector<std::pair<int,int>> QUEEN_DIRS = {
     {-1,-1},{-1,0},{-1,1},
     { 0,-1},       { 0,1},
@@ -40,24 +35,20 @@ std::vector<Square> Queen::getPossibleMoves(const Board& board) const {
 }
 
 bool Queen::canAttack(int r, int c, const Board& board) const {
-    // Attack is possible if sliding from (row_,col_) to (r,c) is unobstructed
     int dr = (r == row_) ? 0 : (r > row_ ? 1 : -1);
     int dc = (c == col_) ? 0 : (c > col_ ? 1 : -1);
-    // Must be on same rank, file, or diagonal
     if (r != row_ && c != col_ && std::abs(r - row_) != std::abs(c - col_))
         return false;
     int cr = row_ + dr, cc = col_ + dc;
     while (cr != r || cc != c) {
-        if (board.isOccupied(cr, cc)) return false;   // blocked
+        if (board.isOccupied(cr, cc)) return false;   
         cr += dr;
         cc += dc;
     }
     return true;
 }
 
-// ══════════════════════════════════════════════════════════════════════
 // Rook — horizontal and vertical sliding
-// ══════════════════════════════════════════════════════════════════════
 static const std::vector<std::pair<int,int>> ROOK_DIRS = {
     {-1,0},{1,0},{0,-1},{0,1}
 };
@@ -79,9 +70,7 @@ bool Rook::canAttack(int r, int c, const Board& board) const {
     return true;
 }
 
-// ══════════════════════════════════════════════════════════════════════
 // Bishop — diagonal sliding
-// ══════════════════════════════════════════════════════════════════════
 static const std::vector<std::pair<int,int>> BISHOP_DIRS = {
     {-1,-1},{-1,1},{1,-1},{1,1}
 };
@@ -103,9 +92,7 @@ bool Bishop::canAttack(int r, int c, const Board& board) const {
     return true;
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// Knight — L-shaped jump (ignores pieces in between)
-// ══════════════════════════════════════════════════════════════════════
+// Knight — L-shaped jump 
 static const int KNIGHT_DELTAS[8][2] = {
     {-2,-1},{-2,1},{-1,-2},{-1,2},
     { 1,-2},{ 1,2},{ 2,-1},{ 2,1}
@@ -128,22 +115,17 @@ bool Knight::canAttack(int r, int c, const Board& /*board*/) const {
     return (dr == 2 && dc == 1) || (dr == 1 && dc == 2);
 }
 
-// ══════════════════════════════════════════════════════════════════════
 // Pawn
 // White advances toward higher row numbers (+1 per step).
 // Black advances toward lower row numbers (-1 per step).
-// Captures are strictly diagonal; no en passant or promotion.
-// ══════════════════════════════════════════════════════════════════════
 std::vector<Square> Pawn::getPossibleMoves(const Board& board) const {
     std::vector<Square> moves;
     int dir       = (color_ == Color::White) ? 1 : -1;   // direction of advance
     int startRow  = (color_ == Color::White) ? 1 : 6;    // initial rank for double-push
 
-    // One square forward (only if empty)
     int fr = row_ + dir;
     if (board.inBounds(fr, col_) && !board.isOccupied(fr, col_)) {
         moves.emplace_back(fr, col_);
-        // Two squares forward from starting rank (only if both squares empty)
         if (row_ == startRow) {
             int fr2 = row_ + 2 * dir;
             if (board.inBounds(fr2, col_) && !board.isOccupied(fr2, col_))
@@ -151,7 +133,6 @@ std::vector<Square> Pawn::getPossibleMoves(const Board& board) const {
         }
     }
 
-    // Diagonal captures
     for (int dc : {-1, 1}) {
         int cr = row_ + dir;
         int cc = col_ + dc;

@@ -4,12 +4,7 @@
 #include <vector>
 #include <memory>
 
-// ─────────────────────────────────────────────
-// Helper: sliding-piece move generator.
-// Walks in a given direction (dr, dc) from (startR, startC)
-// until it hits the board edge, a friendly piece, or a capturable
-// enemy piece (which is included, then stopped).
-// ─────────────────────────────────────────────
+
 inline std::vector<Square> slidingMoves(
     int startR, int startC, Color color,
     const Board& board,
@@ -22,7 +17,7 @@ inline std::vector<Square> slidingMoves(
         while (board.inBounds(r, c)) {
             if (board.isFriendly(r, c, color)) break;        // blocked by own piece
             moves.emplace_back(r, c);
-            if (board.isEnemy(r, c, color)) break;           // capture; stop sliding
+            if (board.isEnemy(r, c, color)) break;           
             r += dr;
             c += dc;
         }
@@ -30,9 +25,7 @@ inline std::vector<Square> slidingMoves(
     return moves;
 }
 
-// ═════════════════════════════════════════════
 // King
-// ═════════════════════════════════════════════
 class King : public Piece {
 public:
     King(Color color, int row = 0, int col = 0)
@@ -48,9 +41,7 @@ public:
     }
 };
 
-// ═════════════════════════════════════════════
 // Queen
-// ═════════════════════════════════════════════
 class Queen : public Piece {
 public:
     Queen(Color color, int row = 0, int col = 0)
@@ -66,9 +57,7 @@ public:
     }
 };
 
-// ═════════════════════════════════════════════
 // Rook
-// ═════════════════════════════════════════════
 class Rook : public Piece {
 public:
     Rook(Color color, int row = 0, int col = 0)
@@ -84,9 +73,7 @@ public:
     }
 };
 
-// ═════════════════════════════════════════════
 // Bishop
-// ═════════════════════════════════════════════
 class Bishop : public Piece {
 public:
     Bishop(Color color, int row = 0, int col = 0)
@@ -102,9 +89,7 @@ public:
     }
 };
 
-// ═════════════════════════════════════════════
 // Knight
-// ═════════════════════════════════════════════
 class Knight : public Piece {
 public:
     Knight(Color color, int row = 0, int col = 0)
@@ -120,11 +105,8 @@ public:
     }
 };
 
-// ═════════════════════════════════════════════
 // Pawn
 // Note: no en passant or promotion (per spec).
-// White pawns move from row 1→7; Black from row 6→0.
-// ═════════════════════════════════════════════
 class Pawn : public Piece {
 public:
     Pawn(Color color, int row = 0, int col = 0)
