@@ -9,6 +9,7 @@
 // ═════════════════════════════════════════════
 enum class AnalysisResult {
     Safe,
+    Stalemate,
     Check,
     Checkmate,
     MateInOne,
@@ -19,6 +20,7 @@ enum class AnalysisResult {
 inline std::string resultToString(AnalysisResult r) {
     switch (r) {
         case AnalysisResult::Safe:      return "SAFE";
+        case AnalysisResult::Stalemate: return "STALEMATE";
         case AnalysisResult::Check:     return "CHECK";
         case AnalysisResult::Checkmate: return "CHECKMATE";
         case AnalysisResult::MateInOne: return "MATE IN 1";

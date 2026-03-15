@@ -86,8 +86,14 @@ static bool placePiece(Board& board, const std::string& token) {
     int col = fileChar - 'a';
     int row = rankChar - '1';
 
-    // Build the piece from the lowercase piece letter
+    // Pawns are illegal on rank 1 (row 0) or rank 8 (row 7)
     char p = static_cast<char>(std::tolower(static_cast<unsigned char>(pieceChar)));
+    if (p == 'p' && (row == 0 || row == 7)) {
+        std::cout << "  [!] Pawns cannot be placed on rank 1 or rank 8.\n";
+        return false;
+    }
+
+    // Build the piece from the lowercase piece letter
     std::unique_ptr<Piece> piece;
     switch (p) {
         case 'k': piece = std::make_unique<King>  (color, row, col); break;
@@ -135,6 +141,15 @@ static bool placePiece(Board& board, const std::string& token) {
                 std::cout << "      Includes up to 8 extras from pawn promotion.\n";
             return false;
         }
+    }
+
+    // Warn if overwriting an existing piece
+    if (board.isOccupied(row, col)) {
+        const Piece* existing = board.getElement(row, col);
+        const char* exColor = (existing->getColor() == Color::White) ? "White" : "Black";
+        std::cout << "  [!] Square " << fileChar << rankChar
+                  << " is already occupied by " << exColor
+                  << " " << existing->symbol() << " — overwriting.\n";
     }
 
     board.setElement(row, col, std::move(piece));
@@ -226,6 +241,39 @@ int main() {
                 break;
             }
             if (lower == "done") {
+                // Require exactly one king per side before analysis
+                int whiteKings = countPieces(board, Color::White, 'k');
+                int blackKings = countPieces(board, Color::Black, 'k');
+                if (whiteKings != 1 || blackKings != 1) {
+                    if (whiteKings == 0)
+                        std::cout << "  [!] Missing White King — place it with e.g. ke1\n";
+                    if (blackKings == 0)
+                        std::cout << "  [!] Missing Black King — place it with e.g. Ke8\n";
+                    std::cout << "      Both kings must be on the board before analysis.\n";
+                    gotCommand = true;
+                    break;
+                }
+                // Reject positions where the two kings are adjacent
+                {
+                    int wkr = -1, wkc = -1, bkr = -1, bkc = -1;
+                    for (int r = 0; r < Board::SIZE; ++r)
+                        for (int c = 0; c < Board::SIZE; ++c) {
+                            const Piece* pc = board.getElement(r, c);
+                            if (!pc) continue;
+                            char sym = static_cast<char>(std::tolower(
+                                           static_cast<unsigned char>(pc->symbol())));
+                            if (sym == 'k') {
+                                if (pc->getColor() == Color::White) { wkr = r; wkc = c; }
+                                else                                 { bkr = r; bkc = c; }
+                            }
+                        }
+                    if (std::abs(wkr - bkr) <= 1 && std::abs(wkc - bkc) <= 1) {
+                        std::cout << "  [!] The two kings are adjacent — illegal position.\n";
+                        std::cout << "      Move one king before running analysis.\n";
+                        gotCommand = true;
+                        break;
+                    }
+                }
                 runAnalysis(board);
                 board.clear();   // reset for next puzzle
                 std::cout << "\n─────────────────────────────────────────────────────\n";

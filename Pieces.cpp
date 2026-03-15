@@ -9,7 +9,7 @@ std::vector<Square> King::getPossibleMoves(const Board& board) const {
     std::vector<Square> moves;
     static const int deltas[8][2] = {
         {-1,-1},{-1,0},{-1,1},
-        { 0,-1},        { 0,1},
+        { 0,-1},       { 0,1},
         { 1,-1},{ 1,0},{ 1,1}
     };
     for (auto& d : deltas) {

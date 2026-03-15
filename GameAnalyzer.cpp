@@ -19,6 +19,8 @@ void GameAnalyzer::evaluate(Color side) {
         result = AnalysisResult::Checkmate;
     } else if (isInCheck(side, board_)) {
         result = AnalysisResult::Check;
+    } else if (hasNoLegalMoves(side, board_)) {
+        result = AnalysisResult::Stalemate;
     } else if (isMateInOne(attacker, board_)) {
         result = AnalysisResult::MateInOne;
     } else if (isMateInTwo(attacker, board_)) {
@@ -31,6 +33,9 @@ void GameAnalyzer::evaluate(Color side) {
     switch (result) {
         case AnalysisResult::Checkmate:
             std::cout << sideStr << " is in CHECKMATE\n";
+            break;
+        case AnalysisResult::Stalemate:
+            std::cout << sideStr << " is in STALEMATE (draw)\n";
             break;
         case AnalysisResult::Check:
             std::cout << sideStr << " is in CHECK\n";
